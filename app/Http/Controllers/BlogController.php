@@ -53,7 +53,7 @@ class BlogController extends Controller
             'status' => 'required|in:Published,Hidden',
         ]);
     
-        $blog = Blog::find($id);
+        $blog = Blog::with('user')->find($id);
     
         if (!$blog) {
             return response()->json(['message' => 'Blog not found'], 404);
@@ -63,6 +63,8 @@ class BlogController extends Controller
         $blog->content = $validated['content'];
         $blog->status = $validated['status'];
         $blog->save();
+
+        $blog->created_by = optional($blog->user)->name;
     
         // Return the updated blog
         return response()->json($blog);
@@ -79,7 +81,7 @@ class BlogController extends Controller
         $blog->status = ($blog->status === 'Published') ? 'Hidden' : 'Published';
         $blog->save();
     
-        $blog->created_by = $blog->user->name;
+        $blog->created_by = optional($blog->user)->name;
 
         return response()->json($blog);
     }
